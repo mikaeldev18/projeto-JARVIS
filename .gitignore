@@ -1,0 +1,24 @@
+# Env
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+.next/
+.cache/
+dist/
+build/
+out/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
