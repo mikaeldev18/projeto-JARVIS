@@ -9,4 +9,5 @@ ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
 if not ANTHROPIC_API_KEY:
-    raise ValueError("ANTHROPIC_API_KEY não configurada no .env")
+    import warnings
+    warnings.warn("ANTHROPIC_API_KEY não configurada — defina a variável de ambiente.")
