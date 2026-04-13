@@ -77,3 +77,27 @@ body::after {
 }
 
 .anim-fade-up { animation: fade-up .25s ease forwards; }
+
+/* ── Responsive ─────────────────────────────────────── */
+
+/* Desktop: sidebar visível, tab bar oculta, seções sempre visíveis */
+@media (min-width: 768px) {
+  .sidebar-desktop { display: flex !important; }
+  .tab-bar         { display: none !important; }
+  .orb-section     { display: flex !important; }
+  .chat-section    { display: flex !important; width: 360px !important; }
+  .tab-hidden      { display: flex !important; }
+}
+
+/* Mobile: sidebar oculta, tab bar visível, alterna seções */
+@media (max-width: 767px) {
+  .sidebar-desktop { display: none !important; }
+  .tab-bar         { display: flex !important; }
+  .chat-section    { width: 100% !important; border-left: none !important; }
+
+  .tab-hidden { display: none !important; }
+  .tab-active { display: flex !important; flex: 1; width: 100%; }
+
+  .orb-section.tab-active  { flex: 1; }
+  .chat-section.tab-active { flex: 1; }
+}
