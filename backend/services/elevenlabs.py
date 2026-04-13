@@ -28,6 +28,9 @@ async def text_to_speech(text: str) -> str:
         response = await client.post(url, json=payload, headers=headers)
         if response.status_code == 200:
             return base64.b64encode(response.content).decode("utf-8")
+        # Log do erro para debug
+        import logging
+        logging.warning(f"ElevenLabs TTS error {response.status_code}: {response.text[:200]}")
         return ""
 
 

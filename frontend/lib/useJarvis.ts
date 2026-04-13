@@ -72,12 +72,19 @@ export function useJarvis() {
       switch (d.type) {
         case 'status':     patch({ status: d.message, processing: true }); break
         case 'transcript': pushMsg({ role: 'user', text: d.text }); break
-        case 'response':
+        case 'response': {
           patch({ agent: d.agent as AgentId, status: 'Online', processing: false })
           pushMsg({ role: 'assistant', text: d.text, agent: d.agent })
-          if (d.audio) playAudio(d.audio, d.text)
-          else { patch({ speaking: true, speakingText: d.text }); setTimeout(() => patch({ speaking: false, speakingText: '' }), 5000) }
+          const displayText = d.voice_text || d.text
+          if (d.audio) playAudio(d.audio, displayText)
+          else {
+            // sem TTS: mostra texto por tempo proporcional ao tamanho
+            const ms = Math.max(5000, Math.min(displayText.length * 60, 20000))
+            patch({ speaking: true, speakingText: displayText })
+            setTimeout(() => patch({ speaking: false, speakingText: '' }), ms)
+          }
           break
+        }
         case 'error': {
           const msg: string = d.message ?? ''
           const friendly = msg.includes('401') || msg.toLowerCase().includes('auth')

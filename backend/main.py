@@ -43,8 +43,10 @@ async def ws_voice(websocket: WebSocket):
                 await send({"type": "status", "message": "Transcrevendo..."})
                 try:
                     transcript = await transcribe(audio_bytes)
-                except Exception:
-                    await send({"type": "error", "message": "Não foi possível transcrever o áudio. Tente digitar sua mensagem."})
+                except Exception as e:
+                    import logging
+                    logging.error(f"STT error: {e}")
+                    await send({"type": "error", "message": f"Erro ao transcrever: {str(e)[:80]}"})
                     continue
 
                 if not transcript.strip():
@@ -71,6 +73,33 @@ async def ws_voice(websocket: WebSocket):
         pass
 
 
+def _summarize_for_voice(text: str, max_chars: int = 450) -> str:
+    """Extrai os primeiros parágrafos significativos para síntese de voz.
+    Agentes retornam textos longos com markdown — só falamos o início."""
+    import re
+    # Remove linhas de markdown (---,###,**) e linhas vazias consecutivas
+    lines = text.splitlines()
+    clean = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped in ('---', '===', '***'): continue
+        if re.match(r'^#{1,4}\s', stripped): continue  # headings
+        if not stripped: continue
+        # Remove bold/italic markers
+        stripped = re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', stripped)
+        stripped = re.sub(r'_{1,2}([^_]+)_{1,2}', r'\1', stripped)
+        clean.append(stripped)
+    result = ' '.join(clean)
+    if len(result) <= max_chars:
+        return result
+    # Corta no último ponto antes do limite
+    cut = result[:max_chars]
+    last_period = max(cut.rfind('.'), cut.rfind('!'), cut.rfind('?'))
+    if last_period > max_chars // 2:
+        return cut[:last_period + 1]
+    return cut.rstrip() + '...'
+
+
 async def _handle_text(text: str, history: list[dict], send, image: str | None = None) -> None:
     await send({"type": "status", "message": "Processando..."})
 
@@ -88,9 +117,14 @@ async def _handle_text(text: str, history: list[dict], send, image: str | None =
 
     await send({"type": "status", "message": "Sintetizando voz..."})
 
+    full_text = result["response"]
+
+    # Cria resumo para voz (máx 500 chars) — agentes retornam textos longos
+    voice_text = _summarize_for_voice(full_text)
+
     audio_b64 = ""
     try:
-        audio_b64 = await text_to_speech(result["response"])
+        audio_b64 = await text_to_speech(voice_text)
     except Exception:
         pass  # TTS é opcional — resposta de texto sempre entregue
 
@@ -99,6 +133,7 @@ async def _handle_text(text: str, history: list[dict], send, image: str | None =
         "agent": result["agent"],
         "task_summary": result["task_summary"],
         "confidence": result["confidence"],
-        "text": result["response"],
+        "text": full_text,
+        "voice_text": voice_text,
         "audio": audio_b64,
     })
