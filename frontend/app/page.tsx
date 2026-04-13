@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Orb }  from '@/components/Orb'
+import { Orb } from '@/components/Orb'
 import { Chat } from '@/components/Chat'
 import { useJarvis } from '@/lib/useJarvis'
 import { AGENT_COLOR, AGENT_LABEL, AgentId } from '@/lib/types'
@@ -15,6 +15,14 @@ export default function Page() {
   const { state, startListening, stopListening, sendText } = useJarvis()
   const accent = AGENT_COLOR[state.agent]
   const [tab, setTab] = useState<'orb' | 'chat'>('orb')
+  const [input, setInput] = useState('')
+
+  const handleSend = () => {
+    if (!input.trim() || state.processing) return
+    sendText(input.trim())
+    setInput('')
+    setTab('chat')
+  }
 
   return (
     <main style={{
@@ -27,7 +35,7 @@ export default function Page() {
       overflow: 'hidden',
     }}>
 
-      {/* ── Scan line ── */}
+      {/* Scan line */}
       <div style={{
         position: 'fixed', left: 0, right: 0, height: 1,
         background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
@@ -35,7 +43,7 @@ export default function Page() {
         pointerEvents: 'none', zIndex: 2,
       }} />
 
-      {/* ── Header mobile ── */}
+      {/* Header */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
@@ -58,20 +66,16 @@ export default function Page() {
         </div>
       </header>
 
-      {/* ── Desktop: 3 colunas | Mobile: tabs ── */}
+      {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-        {/* ── Left sidebar — apenas desktop ── */}
-        <aside style={{
-          width: 200,
-          flexShrink: 0,
+        {/* Sidebar — desktop only */}
+        <aside className="sidebar-desktop" style={{
+          width: 200, flexShrink: 0,
           borderRight: '1px solid rgba(255,255,255,0.04)',
           padding: '24px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          // esconde no mobile via inline (usamos @media no globals.css)
-        }} className="sidebar-desktop">
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div>
               <div style={{ fontSize: 9, letterSpacing: '0.3em', color: 'rgba(226,226,240,0.2)', marginBottom: 10 }}>SISTEMA</div>
@@ -105,17 +109,10 @@ export default function Page() {
           </div>
         </aside>
 
-        {/* ── Center orb — desktop sempre visível, mobile tab ── */}
+        {/* Center — Orb */}
         <section
           className={`orb-section ${tab === 'orb' ? 'tab-active' : 'tab-hidden'}`}
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
         >
           <Orb
             agent={state.agent}
@@ -124,8 +121,10 @@ export default function Page() {
             onDown={startListening}
             onUp={stopListening}
           />
+
+          {/* Status pill */}
           <div style={{
-            position: 'absolute', bottom: 24,
+            marginTop: 24,
             fontSize: 10, letterSpacing: '0.2em',
             color: 'rgba(226,226,240,0.3)',
             background: 'rgba(255,255,255,0.03)',
@@ -134,17 +133,55 @@ export default function Page() {
           }}>
             {state.status.toUpperCase()}
           </div>
+
+          {/* Input móvel dentro do orbe — mobile only */}
+          <div className="mobile-input" style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0, right: 0,
+            padding: '12px 16px',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            background: 'rgba(10,10,15,0.95)',
+          }}>
+            <div style={{
+              display: 'flex', gap: 8, alignItems: 'center',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8, padding: '8px 12px',
+            }}>
+              <input
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSend()}
+                placeholder="Digite uma mensagem..."
+                disabled={state.processing}
+                style={{
+                  flex: 1, background: 'none', border: 'none', outline: 'none',
+                  color: 'rgba(226,226,240,0.9)', fontSize: 13, fontFamily: 'inherit',
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || state.processing}
+                style={{
+                  background: 'none', border: 'none', cursor: input.trim() && !state.processing ? 'pointer' : 'default',
+                  color: accent, fontSize: 10, letterSpacing: '0.2em',
+                  opacity: input.trim() && !state.processing ? 1 : 0.25, fontFamily: 'inherit',
+                }}
+              >
+                ENVIAR
+              </button>
+            </div>
+          </div>
         </section>
 
-        {/* ── Right chat — desktop sempre visível, mobile tab ── */}
+        {/* Right — Chat */}
         <aside
           className={`chat-section ${tab === 'chat' ? 'tab-active' : 'tab-hidden'}`}
           style={{
-            width: 360,
-            flexShrink: 0,
+            width: 360, flexShrink: 0,
             borderLeft: '1px solid rgba(255,255,255,0.04)',
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'flex', flexDirection: 'column',
           }}
         >
           <Chat
@@ -157,31 +194,22 @@ export default function Page() {
         </aside>
       </div>
 
-      {/* ── Bottom tab bar — apenas mobile ── */}
-      <nav className="tab-bar" style={{
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        display: 'flex',
-        flexShrink: 0,
-      }}>
-        {([['orb', '◈ ORBE'], ['chat', '◉ CHAT']] as const).map(([t, label]) => (
+      {/* Tab bar — mobile only */}
+      <nav className="tab-bar" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexShrink: 0 }}>
+        {(['orb', 'chat'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             style={{
-              flex: 1,
-              padding: '14px 0',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 10,
-              letterSpacing: '0.25em',
+              flex: 1, padding: '14px 0',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 10, letterSpacing: '0.25em',
               color: tab === t ? accent : 'rgba(226,226,240,0.3)',
               borderTop: tab === t ? `1px solid ${accent}` : '1px solid transparent',
-              fontFamily: 'inherit',
-              transition: 'color .2s',
+              fontFamily: 'inherit', transition: 'color .2s',
             }}
           >
-            {label}
+            {t === 'orb' ? '◈ ORBE' : '◉ CHAT'}
           </button>
         ))}
       </nav>

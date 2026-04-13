@@ -43,8 +43,8 @@ async def ws_voice(websocket: WebSocket):
                 await send({"type": "status", "message": "Transcrevendo..."})
                 try:
                     transcript = await transcribe(audio_bytes)
-                except Exception as exc:
-                    await send({"type": "error", "message": f"Erro STT: {exc}"})
+                except Exception:
+                    await send({"type": "error", "message": "Não foi possível transcrever o áudio. Tente digitar sua mensagem."})
                     continue
 
                 if not transcript.strip():
@@ -75,8 +75,8 @@ async def _handle_text(text: str, history: list[dict], send) -> None:
 
     try:
         result = await orchestrator.process(text, history)
-    except Exception as exc:
-        await send({"type": "error", "message": f"Erro no processamento: {exc}"})
+    except Exception:
+        await send({"type": "error", "message": "Erro ao processar. Verifique as configurações e tente novamente."})
         return
 
     # Atualiza histórico (mantém últimas 20 trocas = 40 mensagens)

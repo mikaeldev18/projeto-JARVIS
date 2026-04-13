@@ -94,10 +94,16 @@ body::after {
   .sidebar-desktop { display: none !important; }
   .tab-bar         { display: flex !important; }
   .chat-section    { width: 100% !important; border-left: none !important; }
+  .mobile-input    { display: block !important; }
 
   .tab-hidden { display: none !important; }
   .tab-active { display: flex !important; flex: 1; width: 100%; }
 
-  .orb-section.tab-active  { flex: 1; }
+  .orb-section.tab-active  { flex: 1; padding-bottom: 72px; }
   .chat-section.tab-active { flex: 1; }
+}
+
+/* Desktop: esconde input mobile dentro do orbe */
+@media (min-width: 768px) {
+  .mobile-input { display: none !important; }
 }
