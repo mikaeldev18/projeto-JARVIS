@@ -138,6 +138,11 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 .anim-fade-up { animation: fade-up .25s ease forwards; }
 
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
 /* ── Responsive layout ─────────────────────────────────────── */
 
 /* Desktop */
