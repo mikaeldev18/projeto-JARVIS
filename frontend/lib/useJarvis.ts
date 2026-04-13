@@ -12,7 +12,13 @@ type State = {
   processing: boolean
 }
 
-const WS = process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8000/ws/voice'
+function getWsUrl(): string {
+  if (process.env.NEXT_PUBLIC_WS_URL) return process.env.NEXT_PUBLIC_WS_URL
+  if (typeof window === 'undefined') return 'ws://localhost:8000/ws/voice'
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${proto}//localhost:8000/ws/voice`
+}
+const WS = getWsUrl()
 
 function uid() { return Math.random().toString(36).slice(2) }
 
