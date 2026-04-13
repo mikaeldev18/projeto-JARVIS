@@ -12,7 +12,7 @@ type State = {
   processing: boolean
 }
 
-const WS = 'ws://localhost:8000/ws/voice'
+const WS = process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8000/ws/voice'
 
 function uid() { return Math.random().toString(36).slice(2) }
 
