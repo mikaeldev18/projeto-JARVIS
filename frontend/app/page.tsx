@@ -55,7 +55,7 @@ export default function Page() {
             {[
               { k: 'STATUS',  v: state.connected ? 'ONLINE' : 'OFFLINE', c: state.connected ? '#4ade80' : '#f87171' },
               { k: 'AGENTE',  v: AGENT_LABEL[state.agent], c: accent },
-              { k: 'MODELO',  v: 'SONNET 4', c: 'rgba(226,226,240,0.4)' },
+              { k: 'MODELO',  v: 'HAIKU 4.5', c: 'rgba(226,226,240,0.4)' },
             ].map(({ k, v, c }) => (
               <div key={k} style={{
                 display: 'flex',
