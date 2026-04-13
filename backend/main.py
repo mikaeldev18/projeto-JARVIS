@@ -63,24 +63,25 @@ async def ws_voice(websocket: WebSocket):
 
                 if msg.get("type") == "text_message":
                     text_input = msg.get("text", "").strip()
-                    if text_input:
-                        await _handle_text(text_input, history, send)
+                    image_input = msg.get("image")  # base64 data URL or None
+                    if text_input or image_input:
+                        await _handle_text(text_input, history, send, image=image_input)
 
     except WebSocketDisconnect:
         pass
 
 
-async def _handle_text(text: str, history: list[dict], send) -> None:
+async def _handle_text(text: str, history: list[dict], send, image: str | None = None) -> None:
     await send({"type": "status", "message": "Processando..."})
 
     try:
-        result = await orchestrator.process(text, history)
+        result = await orchestrator.process(text, history, image=image)
     except Exception:
         await send({"type": "error", "message": "Erro ao processar. Verifique as configurações e tente novamente."})
         return
 
     # Atualiza histórico (mantém últimas 20 trocas = 40 mensagens)
-    history.append({"role": "user", "content": text})
+    history.append({"role": "user", "content": text or "[imagem enviada]"})
     history.append({"role": "assistant", "content": result["response"]})
     if len(history) > 40:
         del history[:-40]

@@ -10,13 +10,61 @@
   --text:     #e2e2f0;
   --muted:    rgba(226,226,240,0.35);
 
-  --jarvis:       #00d4ff;
-  --design:       #ff6b9d;
-  --landing:      #c084fc;
-  --meta_copy:    #4ade80;
-  --email_copy:   #fbbf24;
-  --google_mentor:#f87171;
-  --meta_mentor:  #60a5fa;
+  --jarvis:        #00d4ff;
+  --design:        #ff6b9d;
+  --landing:       #c084fc;
+  --meta_copy:     #4ade80;
+  --email_copy:    #fbbf24;
+  --google_mentor: #f87171;
+  --meta_mentor:   #60a5fa;
+
+  /* Orb sizes — desktop */
+  --orb:           200px;
+  --orb-bar:       20px;
+  --ring1:         230px;
+  --ring2:         260px;
+  --ring3:         320px;
+  --orb-container: 340px;
+  --orb-icon:      38px;
+}
+
+/* Tablet */
+@media (max-width: 1023px) and (min-width: 768px) {
+  :root {
+    --orb:           175px;
+    --orb-bar:       18px;
+    --ring1:         201px;
+    --ring2:         227px;
+    --ring3:         280px;
+    --orb-container: 295px;
+    --orb-icon:      34px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  :root {
+    --orb:           148px;
+    --orb-bar:       15px;
+    --ring1:         170px;
+    --ring2:         192px;
+    --ring3:         236px;
+    --orb-container: 250px;
+    --orb-icon:      28px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 374px) {
+  :root {
+    --orb:           124px;
+    --orb-bar:       13px;
+    --ring1:         143px;
+    --ring2:         162px;
+    --ring3:         199px;
+    --orb-container: 210px;
+    --orb-icon:      24px;
+  }
 }
 
 html, body {
@@ -26,6 +74,8 @@ html, body {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Subtle grid */
@@ -46,6 +96,9 @@ body::after {
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.25); border-radius: 2px; }
 
+/* Tap highlight */
+button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
 /* ── Orb animations ─────────────────────────────── */
 @keyframes orb-idle {
   0%, 100% { transform: scale(1);    opacity: .85; }
@@ -56,8 +109,7 @@ body::after {
   50%       { transform: scale(1.12); box-shadow: var(--orb-glow-lg); }
 }
 @keyframes orb-think {
-  0%   { transform: rotate(0deg);   }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 @keyframes ring-expand {
   0%   { transform: scale(1);   opacity: .6; }
@@ -75,21 +127,31 @@ body::after {
   0%, 80%, 100% { transform: scale(0.6); opacity: .4; }
   40%            { transform: scale(1);   opacity: 1;  }
 }
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes speaking-bar {
+  from { transform: scaleY(0.4); opacity: 0.4; }
+  to   { transform: scaleY(1.4); opacity: 1; }
+}
 
 .anim-fade-up { animation: fade-up .25s ease forwards; }
 
-/* ── Responsive ─────────────────────────────────────── */
+/* ── Responsive layout ─────────────────────────────────────── */
 
-/* Desktop: sidebar visível, tab bar oculta, seções sempre visíveis */
+/* Desktop */
 @media (min-width: 768px) {
   .sidebar-desktop { display: flex !important; }
   .tab-bar         { display: none !important; }
   .orb-section     { display: flex !important; }
   .chat-section    { display: flex !important; width: 360px !important; }
   .tab-hidden      { display: flex !important; }
+  .mobile-input    { display: none !important; }
+  .speaking-display { bottom: 15% !important; }
 }
 
-/* Mobile: sidebar oculta, tab bar visível, alterna seções */
+/* Mobile */
 @media (max-width: 767px) {
   .sidebar-desktop { display: none !important; }
   .tab-bar         { display: flex !important; }
@@ -99,11 +161,9 @@ body::after {
   .tab-hidden { display: none !important; }
   .tab-active { display: flex !important; flex: 1; width: 100%; }
 
-  .orb-section.tab-active  { flex: 1; padding-bottom: 72px; }
+  .orb-section.tab-active  { flex: 1; padding-bottom: 130px; }
   .chat-section.tab-active { flex: 1; }
-}
 
-/* Desktop: esconde input mobile dentro do orbe */
-@media (min-width: 768px) {
-  .mobile-input { display: none !important; }
+  /* Speaking display above mobile input */
+  .speaking-display { bottom: 140px !important; }
 }

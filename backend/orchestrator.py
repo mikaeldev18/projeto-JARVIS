@@ -74,20 +74,23 @@ class JarvisOrchestrator:
             pass
         return {"agent": "jarvis", "task_summary": message[:60], "confidence": 0.5}
 
-    async def process(self, message: str, history: list[dict] | None = None) -> dict:
+    async def process(self, message: str, history: list[dict] | None = None, image: str | None = None) -> dict:
         """Classifica a intent e roteia para o agente correto."""
         history = history or []
-        intent = await self._classify(message)
+        intent = await self._classify(message or "analise esta imagem")
         agent_name = intent["agent"]
 
-        if agent_name in self._agents:
-            response_text = await self._agents[agent_name].execute(message, history)
-        else:
-            agent_name = "jarvis"
+        user_msg = self._jarvis_client.build_vision_message(message, image)
+
+        if image or agent_name not in self._agents:
+            # Vision messages and jarvis fallback go through jarvis_client
+            agent_name = "jarvis" if agent_name not in self._agents else agent_name
             response_text = await self._jarvis_client.complete(
                 system=JARVIS_SYSTEM,
-                messages=history + [{"role": "user", "content": message}],
+                messages=history + [user_msg],
             )
+        else:
+            response_text = await self._agents[agent_name].execute(message, history)
 
         return {
             "agent": agent_name,

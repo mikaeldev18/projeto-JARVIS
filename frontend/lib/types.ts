@@ -1,17 +1,13 @@
 export type AgentId =
-  | 'jarvis'
-  | 'design'
-  | 'landing_page'
-  | 'meta_copy'
-  | 'email_copy'
-  | 'google_mentor'
-  | 'meta_mentor'
+  | 'jarvis' | 'design' | 'landing_page'
+  | 'meta_copy' | 'email_copy' | 'google_mentor' | 'meta_mentor'
 
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   text: string
   agent?: AgentId
+  image?: string
   ts: Date
 }
 
